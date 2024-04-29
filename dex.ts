@@ -6,17 +6,11 @@ if (args.length === 0) {
 }
 
 const result = await $`docker ps`.text();
-const ids: string[] = [];
-result.split("\n").forEach((line, i) => {
-  if (i === 0) {
-    return;
-  }
-  console.log(`[${i - 1}] ${line}`);
-  ids.push(line.split(/\s+/)[0]);
+const containers = result.split("\n").slice(1);
+const selectedContainer = await $.select({
+  message: "Select a container",
+  options: containers,
 });
-const id = prompt("enter container number:");
-if (!id) {
-  Deno.exit(0);
-}
+const selectedContainerId = containers[selectedContainer].split(/\s+/)[0];
 
-await $`docker exec -it ${ids[parseInt(id)]} ${args}`.noThrow();
+await $`docker exec -it ${selectedContainerId} ${args}`.noThrow();
